@@ -225,7 +225,7 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
         render_markdown_with_latex(prompt)
 
     # ===================== 新增的分支 开始 =====================
-    if selected_expert == "知识点页码查询专家":
+    if selected_expert == "📕知识点查询专家(课本/对应)":
         ai_reply = search_knowledge_page(prompt)
         with st.chat_message("assistant"):
             st.caption(f"🕒 {current_time}")
