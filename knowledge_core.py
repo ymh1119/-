@@ -1,32 +1,33 @@
 import fitz
 import easyocr
 import re
+import streamlit as st
 
 # ===================== 配置区 =====================
 PDF_PATH = "textbook.pdf"
 PAGE_OFFSET = 2
+OCR_DPI = 100  # 降低分辨率，大幅提速
 # ==================================================
 
-_pdf_index_cache = None
-# 初始化OCR阅读器（只加载一次）
-reader = easyocr.Reader(['ch_sim','en'])
+# 缓存OCR模型（全局只初始化1次）
+@st.cache_resource
+def get_ocr_reader():
+    return easyocr.Reader(['ch_sim','en'])
 
+# 缓存PDF全文索引，一次构建，反复查询
+@st.cache_resource
 def load_pdf_index():
-    global _pdf_index_cache
-    if _pdf_index_cache is not None:
-        return _pdf_index_cache
-    
+    reader = get_ocr_reader()
     page_list = []
     doc = fitz.open(PDF_PATH)
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
-        # 优先尝试普通文本提取
         txt = page.get_text()
-        # 如果文本为空，使用OCR识别页面图片
+        # 原生文字为空才执行OCR
         if not txt.strip():
-            pix = page.get_pixmap()
+            pix = page.get_pixmap(dpi=OCR_DPI)
             img_bytes = pix.tobytes("png")
-            ocr_result = reader.readtext(img_bytes, detail=0)
+            ocr_result = reader.readtext(img_bytes, detail=0, min_size=8)
             txt = "".join(ocr_result)
         
         page_list.append({
@@ -35,7 +36,6 @@ def load_pdf_index():
             "text_clean": re.sub(r'\s+', '', txt)
         })
     doc.close()
-    _pdf_index_cache = page_list
     return page_list
 
 
