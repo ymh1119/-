@@ -164,7 +164,11 @@ render_symbol_sidebar()
 # ==========================================
 # 7. 对话渲染与交互
 # ==========================================
-st.title(selected_expert.split()[1]) # 在主界面显示助教名字
+parts = selected_expert.split()
+if len(parts) >= 2:
+    st.title(parts[1])
+else:
+    st.title(selected_expert)
 
 # 渲染历史对话
 for i, msg in enumerate(messages):
