@@ -5,3 +5,4 @@ pdfplumber
 langchain-openai
 supabase
 PyMuPDF
+easyocr
