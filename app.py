@@ -95,8 +95,8 @@ st.sidebar.markdown("### 📚 历史对话记录")
 
 # 获取当前选中专家下的所有对话标题
 # available_sessions = list(full_history.get(selected_expert, {}).keys())
-if not available_sessions:
-    available_sessions = ["默认对话"]
+# if not available_sessions:
+   # available_sessions = ["默认对话"]
 
 # 侧边栏：新建对话按钮
 if st.sidebar.button("➕ 新建对话"):
