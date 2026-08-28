@@ -4,3 +4,4 @@ matplotlib
 pdfplumber
 langchain-openai
 supabase
+pymupdf
