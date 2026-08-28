@@ -90,11 +90,11 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("### 📚 历史对话记录")
 
 # 从云端数据库拉取当前登录用户的全部历史记录
-with st.spinner("🔄 同步历史记忆..."):
+# with st.spinner("🔄 同步历史记忆..."):
     # full_history = db_core.load_user_history(st.session_state.username)
 
 # 获取当前选中专家下的所有对话标题
-available_sessions = list(full_history.get(selected_expert, {}).keys())
+# available_sessions = list(full_history.get(selected_expert, {}).keys())
 if not available_sessions:
     available_sessions = ["默认对话"]
 
