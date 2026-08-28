@@ -1,4 +1,5 @@
-import fitz  # PyMuPDF
+import fitz
+import easyocr
 import re
 
 # ===================== 配置区 =====================
@@ -7,9 +8,10 @@ PAGE_OFFSET = 2
 # ==================================================
 
 _pdf_index_cache = None
+# 初始化OCR阅读器（只加载一次）
+reader = easyocr.Reader(['ch_sim','en'])
 
 def load_pdf_index():
-    """使用PyMuPDF预加载pdf，返回每页文本"""
     global _pdf_index_cache
     if _pdf_index_cache is not None:
         return _pdf_index_cache
@@ -18,7 +20,15 @@ def load_pdf_index():
     doc = fitz.open(PDF_PATH)
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
-        txt = page.get_text() or ""
+        # 优先尝试普通文本提取
+        txt = page.get_text()
+        # 如果文本为空，使用OCR识别页面图片
+        if not txt.strip():
+            pix = page.get_pixmap()
+            img_bytes = pix.tobytes("png")
+            ocr_result = reader.readtext(img_bytes, detail=0)
+            txt = "".join(ocr_result)
+        
         page_list.append({
             "pdf_page": page_num + 1,
             "text": txt,
@@ -30,7 +40,6 @@ def load_pdf_index():
 
 
 def search_knowledge_page(keyword: str) -> str:
-    """核心接口：输入知识点关键词，返回实体课本页码+文本片段"""
     try:
         pages = load_pdf_index()
     except FileNotFoundError:
@@ -52,11 +61,11 @@ def search_knowledge_page(keyword: str) -> str:
     if hit_list:
         return debug_info + "\n\n".join(hit_list)
     else:
-        return debug_info + "❌ 在教材中未检索到该知识点，请核对关键词（可尝试输入PDF里一整句原文测试）"
+        return debug_info + "❌ 在教材中未检索到该知识点，请核对关键词"
 
 
 if __name__ == "__main__":
     pages = load_pdf_index()
-    for i, p in enumerate(pages[:5]):
+    for i, p in enumerate(pages[:3]):
         preview = p["text"][:100].replace("\n", " ")
         print(f"第{p['pdf_page']}页: {preview}\n")
