@@ -109,7 +109,7 @@ if "current_session" not in st.session_state or st.session_state.current_session
     if "current_session" in st.session_state and st.session_state.current_session.startswith("对话_"):
         available_sessions.insert(0, st.session_state.current_session)
     else:
-        st.session_state.current_session = available_sessions[-1] if available_sessions else "默认对话"
+        st.session_state.current_session = "默认对话"
 
 # 侧边栏：下拉菜单选择历史对话
 current_session = st.sidebar.selectbox(
