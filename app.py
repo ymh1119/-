@@ -105,23 +105,23 @@ if st.sidebar.button("➕ 新建对话"):
     st.rerun()
 
 # 确保 session_state 里有 current_session
-if "current_session" not in st.session_state or st.session_state.current_session not in available_sessions:
-    if "current_session" in st.session_state and st.session_state.current_session.startswith("对话_"):
-        available_sessions.insert(0, st.session_state.current_session)
-    else:
-        st.session_state.current_session = "默认对话"
+# if "current_session" not in st.session_state or st.session_state.current_session not in available_sessions:
+    # if "current_session" in st.session_state and st.session_state.current_session.startswith("对话_"):
+        # available_sessions.insert(0, st.session_state.current_session)
+   # else:
+        # st.session_state.current_session = "默认对话"
 
 # 侧边栏：下拉菜单选择历史对话
-current_session = st.sidebar.selectbox(
-    "选择或切换聊天记录",
-    options=available_sessions,
-    index=available_sessions.index(st.session_state.current_session) if st.session_state.current_session in available_sessions else 0
-)
-st.session_state.current_session = current_session
+# current_session = st.sidebar.selectbox(
+    # "选择或切换聊天记录",
+    # options=available_sessions,
+    # index=available_sessions.index(st.session_state.current_session) if st.session_state.current_session in available_sessions else 0
+# )
+# st.session_state.current_session = current_session
 
 # 获取当前选中的具体聊天消息
-messages = full_history.get(selected_expert, {}).get(current_session, [])
-
+# messages = full_history.get(selected_expert, {}).get(current_session, [])
+messages=[]
 # ==========================================
 # 6. 专属符号模块 (折叠面板)
 # ==========================================
