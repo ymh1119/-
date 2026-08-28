@@ -1,8 +1,5 @@
 streamlit
 numpy
 matplotlib
-pdfplumber
 langchain-openai
 supabase
-PyMuPDF
-easyocr
