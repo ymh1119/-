@@ -77,7 +77,7 @@ expert_modes = [
     "🔍 深度答疑专家 (讲解/解惑)", 
     "📝 测验与解析专家 (出题/批改)", 
     "📊 仿真绘图专家 (波形/频谱)",
-    "知识点页码查询专家"
+    "📕知识点查询专家(课本/对应)"
 ]
 selected_expert = st.sidebar.radio("请选择你的专属 AI 助教", expert_modes)
 
