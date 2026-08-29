@@ -344,5 +344,3 @@ else:
                     st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
                 except Exception as e:
                     st.error(f"❌ 系统发生异常：{e}")
-                if was_renamed:
-                    st.rerun()
