@@ -243,24 +243,80 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
             query=prompt,
             response=ai_reply
         )
+  else:
+    # 新增：仿真绘图专家 单独分支，直接绘图，跳过AI
+    if "仿真绘图专家" in selected_expert:
+        draw_keywords = ["绘制", "画图", "波形", "频谱", "正弦", "方波", "脉冲", "信号图", "叠加"]
+        is_draw_task = any(word in prompt for word in draw_keywords)
+        if is_draw_task:
+            try:
+                fig = plot_core.draw_signal(prompt)
+                with st.chat_message("assistant"):
+                    st.pyplot(fig)
+            except Exception as e:
+                with st.chat_message("assistant"):
+                    st.error(f"绘图出错：{str(e)}")
+        else:
+            # 输入不是绘图指令，才走原有AI逻辑
+            with st.chat_message("assistant"):
+                with st.spinner("🤖 AI 正在检索教材并思考中…"):
+                    try:
+                        api_key = st.secrets["API_KEY"]
+                        qa_chain = rag_core.init_rag_system(
+                            api_key=api_key,
+                            expert_mode=selected_expert,
+                            pdf_name=PDF_FILE_PATH
+                        )
+                        response = qa_chain.invoke({
+                            "query": prompt,
+                            "chat_history": history_for_chain
+                        })
+                        # 兼容返回格式
+                        if isinstance(response, dict) and "result" in response:
+                            ai_reply = response["result"]
+                        elif isinstance(response, dict) and "text" in response:
+                            ai_reply = response["text"]
+                        elif hasattr(response, "content"):
+                            ai_reply = response.content
+                        else:
+                            ai_reply = str(response)
+
+                        st.caption(f"🕒 {current_time}")
+                        render_markdown_with_latex(ai_reply)
+                        with st.expander("📋 点击展开以一键复制全文:"):
+                            st.code(ai_reply, language="markdown")
+                        # 绘图标记
+                        if "绘图" in selected_expert:
+                            plot_core.render_interactive_plot(ai_reply, msg_index=f"{datetime.datetime.now().timestamp()}")
+                        # 入库日志
+                        db_core.log_interaction(
+                            username=st.session_state.username,
+                            expert_mode=selected_expert,
+                            session_id=st.session_state.current_session,
+                            query=prompt,
+                            response=ai_reply
+                        )
+                    except KeyError:
+                        st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
+                    except Exception as e:
+                        st.error(f"❌ 系统发生异常：{e}")
+                    if was_renamed:
+                        st.rerun()
+ # 不是绘图专家，正常走原有AI
     else:
-        # ========= 所有旧代码放在这里（必须缩进一级！）=========
         with st.chat_message("assistant"):
-            with st.spinner("🌸 AI 正在检索教材并思考中..."):
+            with st.spinner("🤖 AI 正在检索教材并思考中…"):
                 try:
                     api_key = st.secrets["API_KEY"]
-                    # 初始化 RAG 系统
                     qa_chain = rag_core.init_rag_system(
                         api_key=api_key,
                         expert_mode=selected_expert,
                         pdf_name=PDF_FILE_PATH
                     )
-                    # ✨核心修改：通过字典将问题和历史记录一起传给大模型
                     response = qa_chain.invoke({
                         "query": prompt,
                         "chat_history": history_for_chain
                     })
-                    # 兼容处理返回的各种数据格式
                     if isinstance(response, dict) and "result" in response:
                         ai_reply = response["result"]
                     elif isinstance(response, dict) and "text" in response:
@@ -270,16 +326,12 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
                     else:
                         ai_reply = str(response)
 
-                    # 展现 AI 回复文本与时间戳
                     st.caption(f"🕒 {current_time}")
                     render_markdown_with_latex(ai_reply)
-                    # ✨ 新增功能1：为新生成的AI回复添加一键复制面板
                     with st.expander("📋 点击展开以一键复制全文:"):
                         st.code(ai_reply, language="markdown")
-                    # 3.若当前是绘图专家，调用外包模块输出可微调图像
                     if "绘图" in selected_expert:
-                        plot_core.render_interactive_plot(ai_reply, msg_index=f"{new(datetime.datetime.now()).timestamp()}")
-                    # 4.将本次完整交互连同精准时间戳存入数据库
+                        plot_core.render_interactive_plot(ai_reply, msg_index=f"{datetime.datetime.now().timestamp()}")
                     db_core.log_interaction(
                         username=st.session_state.username,
                         expert_mode=selected_expert,
@@ -288,10 +340,8 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
                         response=ai_reply
                     )
                 except KeyError:
-                    st.error("⚠️ 发生错误：未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
+                    st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
                 except Exception as e:
-                    st.error(f"❌ 系统发生异常: {e}")
-        # 对话生成结束。如果触发了智能重命名，强制刷新页面使得侧边栏实时生效
-        if was_renamed:
-            st.rerun()
-    # ===================== 新增的分支 结束 =====================
+                    st.error(f"❌ 系统发生异常：{e}")
+                if was_renamed:
+                    st.rerun()
