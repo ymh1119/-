@@ -6,32 +6,8 @@ plt.switch_backend("Agg")
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
-def draw_wave(t, signal, title="波形图", xlabel="时间 (s)", ylabel="幅值"):
-    fig, ax = plt.subplots(figsize=(10,4), dpi=150)
-    ax.plot(t, signal, color="#1f77b4", linewidth=1.4, antialiased=True)
-    ax.grid(True, alpha=0.2)
-    ax.axhline(y=0, color="#666666", lw=0.8)
-    ax.set_title(title, fontsize=11)
-    ax.set_xlabel(xlabel, fontsize=8)
-    ax.set_ylabel(ylabel, fontsize=8)
-    plt.tight_layout()
-    return fig
-
-def draw_spectrum(freq, amp, title="频谱图"):
-    fig, ax = plt.subplots(figsize=(10,4), dpi=150)
-    markerline, stemlines, baseline = ax.stem(freq, amp, basefmt=" ", linefmt="#ff6666", markerfmt="o")
-    plt.setp(markerline, markersize=4)
-    ax.grid(True, alpha=0.2)
-    ax.axhline(y=0, color="#666666", lw=0.8)
-    ax.set_title(title, fontsize=11)
-    ax.set_xlabel("频率 (Hz)", fontsize=8)
-    ax.set_ylabel("幅度", fontsize=8)
-    ax.set_xlim(0, 50)
-    plt.tight_layout()
-    return fig
-
 def draw_signal(text: str):
-    """解析绘图指令，同时生成时域波形+频谱"""
+    """解析绘图指令，同时生成时域波形+频谱，保证一定会返回fig"""
     fs = 1000
     t_total = 1
     t = np.linspace(0, t_total, int(fs * t_total), endpoint=False)
@@ -69,7 +45,7 @@ def draw_signal(text: str):
     ax1.set_title("时域波形", fontsize=11)
     ax1.set_xlabel("时间 (s)", fontsize=8)
     ax1.set_ylabel("幅值", fontsize=8)
-    # 频谱子图（已经修复老matplotlib兼容问题）
+    # 频谱子图（兼容老matplotlib）
     markerline, stemlines, baseline = ax2.stem(freq, amp, basefmt=" ", linefmt="#ff6666", markerfmt="o")
     plt.setp(markerline, markersize=4)
     ax2.grid(True, alpha=0.2)
@@ -79,4 +55,5 @@ def draw_signal(text: str):
     ax2.set_ylabel("幅度", fontsize=8)
     ax2.set_xlim(0, 50)
     plt.tight_layout()
+    # ✅ 保证一定返回画布，不会出现None
     return fig
