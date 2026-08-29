@@ -71,8 +71,7 @@ def draw_signal(text: str):
     ax1.set_xlabel("时间 (s)", fontsize=8)
     ax1.set_ylabel("幅值", fontsize=8)
     # 频谱
-    markerline, stemlines, baseline = ax2.stem(freq, amp, basefmt=" ", linefmt="#ff6666", markerfmt="o")
-    plt.setp(markerline,markersize=4)
+    markerline, stemlines, baseline = ax2.stem(freq, amp, basefmt=" ", linefmt="#ff6666", markerfmt="o",markersize=4)
     ax2.grid(True, alpha=0.2)
     ax2.axhline(y=0, color="#666666", lw=0.8)
     ax2.set_title("频谱图", fontsize=11)
