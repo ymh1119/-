@@ -14,7 +14,7 @@ if prompt:
     with st.chat_message("user"):
         st.write(prompt)
     try:
-        # 直接生成波形+频谱，不搞关键词判断
+        # 直接生成波形+频谱
         fs = 1000
         t_total = 1
         t = np.linspace(0, t_total, int(fs * t_total), endpoint=False)
@@ -35,7 +35,10 @@ if prompt:
         ax1.set_ylabel("幅值")
         ax1.grid(alpha=0.2)
 
-        markerline, stemlines, baseline = ax2.stem(freq, amp, basefmt=" ", linefmt="#ff6666", markerfmt="o", markersize=4)
+        # 【这里就是你要改的地方】
+        markerline, stemlines, baseline = ax2.stem(freq, amp, basefmt=" ", linefmt="#ff6666", markerfmt="o")
+        plt.setp(markerline, markersize=4)
+        
         ax2.set_title("频谱图")
         ax2.set_xlabel("频率(Hz)")
         ax2.set_ylabel("幅度")
