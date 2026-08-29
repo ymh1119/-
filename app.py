@@ -251,6 +251,9 @@ else:
             is_draw_task = False
         else:
             is_draw_task = any(word in prompt for word in draw_keywords)
+# 调试：把判断结果打印在页面上
+        with st.chat_message("assistant"):
+            st.write(f"调试信息：is_draw_task={is_draw_task}")            
         if is_draw_task:
             try:
                 fig = plot_core.draw_signal(prompt)
