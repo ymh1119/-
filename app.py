@@ -6,7 +6,7 @@ import datetime
 from datetime import timezone, timedelta
 from knowledge_core import search_knowledge_page
 # 下面原有导入不动（包含 from plot_core import xxx 绘图优化相关代码）
-# import db_core
+import db_core
 import rag_core
 import plot_core  # 导入新解耦的专属绘图核心模块
 
