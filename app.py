@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # 云端matplotlib强制配置，必须放在最前面
-plt.use("Agg")
+plt.switch_backend("Agg")
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
