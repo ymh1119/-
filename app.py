@@ -244,6 +244,7 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
             response=ai_reply
         )
 else:
+    st.write(f"当前专家模式：{selected_expert}")
     # 新增：仿真绘图专家 单独分支，直接绘图，跳过AI
     if "仿真绘图专家" in selected_expert:
         draw_keywords = ["绘制","画图","绘图","画波形","画频谱","画出谱图","画信号"]
@@ -251,9 +252,7 @@ else:
             is_draw_task = False
         else:
             is_draw_task = any(word in prompt for word in draw_keywords)
-# 调试：把判断结果打印在页面上
-        with st.chat_message("assistant"):
-            st.write(f"调试信息：is_draw_task={is_draw_task}")            
+            
         if is_draw_task:
             try:
                 fig = plot_core.draw_signal(prompt)
