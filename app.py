@@ -247,7 +247,7 @@ else:
     # 新增：仿真绘图专家 单独分支，直接绘图，跳过AI
     if "仿真绘图专家" in selected_expert:
         draw_keywords = ["绘制", "画图", "波形", "频谱", "正弦", "方波", "脉冲", "信号图", "叠加"]
-        is_draw_task = any(word in prompt for word in draw_keywords)
+        is_draw_task = any(word in (prompt or "") for word in draw_keywords)
         if is_draw_task:
             try:
                 fig = plot_core.draw_signal(prompt)
