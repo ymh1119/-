@@ -248,14 +248,14 @@ else:
     if "仿真绘图专家" in selected_expert:
         draw_keywords = ["绘制", "画图", "波形", "频谱", "正弦", "方波", "脉冲", "信号图", "叠加"]
         is_draw_task = any(word in (prompt or "") for word in draw_keywords)
-        if is_draw_task:
-            try:
-                fig = plot_core.draw_signal(prompt)
-                with st.chat_message("assistant"):
-                    st.pyplot(fig)
-            except Exception as e:
-                with st.chat_message("assistant"):
-                    st.error(f"绘图出错：{str(e)}")
+        # if is_draw_task:
+        try:
+            fig = plot_core.draw_signal(prompt)
+            with st.chat_message("assistant"):
+                st.pyplot(fig)
+        except Exception as e:
+            with st.chat_message("assistant"):
+                st.error(f"绘图出错：{str(e)}")
         else:
             # 输入不是绘图指令，才走原有AI逻辑
             with st.chat_message("assistant"):
