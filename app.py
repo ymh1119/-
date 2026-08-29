@@ -246,60 +246,63 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
 else:
     # 新增：仿真绘图专家 单独分支，直接绘图，跳过AI
     if "仿真绘图专家" in selected_expert:
-        draw_keywords = ["绘制", "画图", "波形", "频谱", "正弦", "方波", "脉冲", "信号图", "叠加"]
-        is_draw_task = any(word in (prompt or "") for word in draw_keywords)
-        #if is_draw_task:
-        try:
-            fig = plot_core.draw_signal(prompt)
-            with st.chat_message("assistant"):
-                st.pyplot(fig)
-        except Exception as e:
-            with st.chat_message("assistant"):
-                st.error(f"绘图出错：{str(e)}")
-        #else:
+        draw_keywords = ["绘制","画图","绘图","画波形","画频谱","画出谱图","画信号"]
+        if prompt is None:
+            is_draw_task = False
+        else:
+            is_draw_task = any(word in prompt for word in draw_keywords)
+        if is_draw_task:
+            try:
+                fig = plot_core.draw_signal(prompt)
+                with st.chat_message("assistant"):
+                    st.pyplot(fig)
+            except Exception as e:
+                with st.chat_message("assistant"):
+                    st.error(f"绘图出错：{str(e)}")
+        else:
             # 输入不是绘图指令，才走原有AI逻辑
-            #with st.chat_message("assistant"):
-                #with st.spinner("🤖 AI 正在检索教材并思考中…"):
-                    #try:
-                        #api_key = st.secrets["API_KEY"]
-                        #qa_chain = rag_core.init_rag_system(
-                            #api_key=api_key,
-                            #expert_mode=selected_expert,
-                            #pdf_name=PDF_FILE_PATH
-                        #)
-                        #response = qa_chain.invoke({
-                            #"query": prompt,
-                            #"chat_history": history_for_chain
-                        #})
+            with st.chat_message("assistant"):
+                with st.spinner("🤖 AI 正在检索教材并思考中…"):
+                    try:
+                        api_key = st.secrets["API_KEY"]
+                        qa_chain = rag_core.init_rag_system(
+                            api_key=api_key,
+                            expert_mode=selected_expert,
+                            pdf_name=PDF_FILE_PATH
+                        )
+                        response = qa_chain.invoke({
+                            "query": prompt,
+                            "chat_history": history_for_chain
+                        })
                         # 兼容返回格式
-                        #if isinstance(response, dict) and "result" in response:
-                            #ai_reply = response["result"]
-                        #elif isinstance(response, dict) and "text" in response:
-                            #ai_reply = response["text"]
-                        #elif hasattr(response, "content"):
-                            #ai_reply = response.content
-                        #else:
-                            #ai_reply = str(response)
+                        if isinstance(response, dict) and "result" in response:
+                            ai_reply = response["result"]
+                        elif isinstance(response, dict) and "text" in response:
+                            ai_reply = response["text"]
+                        elif hasattr(response, "content"):
+                            ai_reply = response.content
+                        else:
+                            ai_reply = str(response)
 
-                        #st.caption(f"🕒 {current_time}")
-                        #render_markdown_with_latex(ai_reply)
-                        #with st.expander("📋 点击展开以一键复制全文:"):
-                            #st.code(ai_reply, language="markdown")
+                        st.caption(f"🕒 {current_time}")
+                        render_markdown_with_latex(ai_reply)
+                        with st.expander("📋 点击展开以一键复制全文:"):
+                            st.code(ai_reply, language="markdown")
                         # 绘图标记
-                        #if "绘图" in selected_expert:
-                            #plot_core.render_interactive_plot(ai_reply, msg_index=f"{datetime.datetime.now().timestamp()}")
+                        if "绘图" in selected_expert:
+                            plot_core.render_interactive_plot(ai_reply, msg_index=f"{datetime.datetime.now().timestamp()}")
                         # 入库日志
-                        #db_core.log_interaction(
-                            #username=st.session_state.username,
-                            #expert_mode=selected_expert,
-                            #session_id=st.session_state.current_session,
-                            #query=prompt,
-                            #response=ai_reply
-                        #)
-                    #except KeyError:
-                        #st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
-                    #except Exception as e:
-                        #st.error(f"❌ 系统发生异常：{e}")
+                        db_core.log_interaction(
+                            username=st.session_state.username,
+                            expert_mode=selected_expert,
+                            session_id=st.session_state.current_session,
+                            query=prompt,
+                            response=ai_reply
+                        )
+                    except KeyError:
+                        st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
+                    except Exception as e:
+                        st.error(f"❌ 系统发生异常：{e}")
 
     # 不是绘图专家，正常走原有AI
     else:
