@@ -14,7 +14,10 @@ import plot_core  # 导入新解耦的专属绘图核心模块
 # 1. 页面与全局设置
 # ==========================================
 st.set_page_config(page_title="信号与系统 AI 助教", page_icon="📡", layout="wide")
-
+# ========== 新增：初始化会话变量，防止后面代码报错 ==========
+if "current_session" not in st.session_state:
+    st.session_state.current_session = "默认会话"
+# ============================================================
 # 🎨 注入自定义 CSS，完美复刻 Gemini 居中留白布局
 st.markdown("""
     <style>
