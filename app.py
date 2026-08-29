@@ -243,7 +243,7 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
             query=prompt,
             response=ai_reply
         )
-  else:
+else:
     # 新增：仿真绘图专家 单独分支，直接绘图，跳过AI
     if "仿真绘图专家" in selected_expert:
         draw_keywords = ["绘制", "画图", "波形", "频谱", "正弦", "方波", "脉冲", "信号图", "叠加"]
@@ -302,7 +302,8 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
                         st.error(f"❌ 系统发生异常：{e}")
                     if was_renamed:
                         st.rerun()
- # 不是绘图专家，正常走原有AI
+
+    # 不是绘图专家，正常走原有AI
     else:
         with st.chat_message("assistant"):
             with st.spinner("🤖 AI 正在检索教材并思考中…"):
