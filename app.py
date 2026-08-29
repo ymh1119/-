@@ -9,7 +9,6 @@ from knowledge_core import search_knowledge_page
 import db_core
 import rag_core
 import plot_core  # 导入新解耦的专属绘图核心模块
-
 # ==========================================
 # 1. 页面与全局设置
 # ==========================================
@@ -30,7 +29,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
 # ==========================================
 # 2. 文本解析组件
 # ==========================================
@@ -43,7 +41,6 @@ def render_markdown_with_latex(text):
     # 替换行内公式
     text = text.replace('\\(', '$').replace('\\)', '$')
     st.markdown(text)
-
 # ==========================================
 # 3. 登录认证模块 (带密码)
 # ==========================================
@@ -51,7 +48,6 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "username" not in st.session_state:
     st.session_state.username = ""
-
 st.sidebar.title("🔐 用户登录")
 if not st.session_state.logged_in:
     username_input = st.sidebar.text_input("👤 用户名")
@@ -71,7 +67,6 @@ else:
         st.session_state.logged_in = False
         st.session_state.username = ""
         st.rerun()
-
 # ==========================================
 # 4. 主界面与专家选择
 # ==========================================
@@ -83,37 +78,30 @@ expert_modes = [
     "📕知识点查询专家(课本/对应)"
 ]
 selected_expert = st.sidebar.radio("请选择你的专属 AI 助教", expert_modes)
-
 PDF_FILE_PATH = "signal_and_systems.pdf" 
-
 # ==========================================
 # 5. 历史记录模块 (排在符号面板上方)
 # ==========================================
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📚 历史对话记录")
-
 # 从云端数据库拉取当前登录用户的全部历史记录
 # with st.spinner("🔄 同步历史记忆..."):
     # full_history = db_core.load_user_history(st.session_state.username)
-
 # 获取当前选中专家下的所有对话标题
 # available_sessions = list(full_history.get(selected_expert, {}).keys())
 # if not available_sessions:
    # available_sessions = ["默认对话"]
-
 # 侧边栏：新建对话按钮
 if st.sidebar.button("➕ 新建对话"):
     new_session = datetime.datetime.now().strftime("对话_%m%d_%H%M")
     st.session_state.current_session = new_session
     st.rerun()
-
 # 确保 session_state 里有 current_session
 # if "current_session" not in st.session_state or st.session_state.current_session not in available_sessions:
     # if "current_session" in st.session_state and st.session_state.current_session.startswith("对话_"):
         # available_sessions.insert(0, st.session_state.current_session)
    # else:
         # st.session_state.current_session = "默认对话"
-
 # 侧边栏：下拉菜单选择历史对话
 # current_session = st.sidebar.selectbox(
     # "选择或切换聊天记录",
@@ -121,7 +109,6 @@ if st.sidebar.button("➕ 新建对话"):
     # index=available_sessions.index(st.session_state.current_session) if st.session_state.current_session in available_sessions else 0
 # )
 # st.session_state.current_session = current_session
-
 # 获取当前选中的具体聊天消息
 # messages = full_history.get(selected_expert, {}).get(current_session, [])
 messages=[]
@@ -129,12 +116,10 @@ messages=[]
 # 6. 专属符号模块 (折叠面板)
 # ==========================================
 st.sidebar.markdown("---")
-
 def render_symbol_sidebar():
     """渲染侧边栏的专属符号复制面板（折叠形式）"""
     with st.sidebar.expander("🧮 专属符号面板 (点击展开)"):
         st.caption("👉 鼠标悬浮在符号上，点击 📋 即可复制")
-
         st.markdown("**1. 常用希腊字母**")
         c1, c2, c3, c4 = st.columns(4)
         c1.code("ω", language="text")
@@ -160,10 +145,8 @@ def render_symbol_sidebar():
         c2.code("∞", language="text")
         c3.code("∫", language="text")
         c4.code("∑", language="text")
-
 # 调用折叠面板
 render_symbol_sidebar()
-
 # ==========================================
 # 7. 对话渲染与交互
 # ==========================================
@@ -172,7 +155,6 @@ if len(parts) >= 2:
     st.title(parts[1])
 else:
     st.title(selected_expert)
-
 # 渲染历史对话
 for i, msg in enumerate(messages):
     with st.chat_message(msg["role"]):
@@ -190,7 +172,6 @@ for i, msg in enumerate(messages):
         # 如果是历史记录里的画图专家回复，调用模块渲染出带微调台的图像
         if "📊" in selected_expert and msg["role"] == "assistant":
             plot_core.render_interactive_plot(msg["content"], msg_index=f"history_{i}")
-
 # ==========================================
 # 8. AI 调用与数据库写入
 # ==========================================
@@ -217,17 +198,16 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
             old_session_name, 
             new_session_name
         )
-
     # 捕获精确的北京提问时间
     bj_tz = timezone(timedelta(hours=8))
     current_time = datetime.datetime.now(bj_tz).strftime("%Y年%m月%d日 %H:%M:%S")
-
     # 1. 展示用户提问
     with st.chat_message("user"):
         st.caption(f"🕒 {current_time}")
         render_markdown_with_latex(prompt)
 
-    # ===================== 新增的分支 开始 =====================
+
+    # ===================== 知识点查询专家分支 开始 =====================
     if selected_expert == "📕知识点查询专家(课本/对应)":
         ai_reply = search_knowledge_page(prompt)
         with st.chat_message("assistant"):
@@ -243,15 +223,18 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
             query=prompt,
             response=ai_reply
         )
-else:
-    # 新增：仿真绘图专家 单独分支，直接绘图，跳过AI
-    if "仿真绘图专家" in selected_expert:
+
+    # ===================== 仿真绘图专家分支 =====================
+    elif "仿真绘图专家" in selected_expert:
         draw_keywords = ["绘制","画图","绘图","画波形","画频谱","画出谱图","画信号"]
         if prompt is None:
             is_draw_task = False
         else:
             is_draw_task = any(word in prompt for word in draw_keywords)
-            
+        # 调试打印语句，跑通绘图之后删掉这一行
+        with st.chat_message("assistant"):
+            st.write(f"调试信息：is_draw_task={is_draw_task}")
+
         if is_draw_task:
             try:
                 fig = plot_core.draw_signal(prompt)
@@ -284,7 +267,6 @@ else:
                             ai_reply = response.content
                         else:
                             ai_reply = str(response)
-
                         st.caption(f"🕒 {current_time}")
                         render_markdown_with_latex(ai_reply)
                         with st.expander("📋 点击展开以一键复制全文:"):
@@ -304,8 +286,7 @@ else:
                         st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
                     except Exception as e:
                         st.error(f"❌ 系统发生异常：{e}")
-
-    # 不是绘图专家，正常走原有AI
+    # 剩下：深度答疑专家、测验专家，正常走原有AI
     else:
         with st.chat_message("assistant"):
             with st.spinner("🤖 AI 正在检索教材并思考中…"):
@@ -328,7 +309,6 @@ else:
                         ai_reply = response.content
                     else:
                         ai_reply = str(response)
-
                     st.caption(f"🕒 {current_time}")
                     render_markdown_with_latex(ai_reply)
                     with st.expander("📋 点击展开以一键复制全文:"):
@@ -346,3 +326,5 @@ else:
                     st.error("⚠️ 发生错误: 未能从系统配置(Secrets)中找到 API KEY，请检查配置！")
                 except Exception as e:
                     st.error(f"❌ 系统发生异常：{e}")
+
+
