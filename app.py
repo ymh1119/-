@@ -231,9 +231,6 @@ if prompt := st.chat_input("输入你的问题，或展开左侧面板复制符�
             is_draw_task = False
         else:
             is_draw_task = any(word in prompt for word in draw_keywords)
-        # 调试打印语句，跑通绘图之后删掉这一行
-        with st.chat_message("assistant"):
-            st.write(f"调试信息：is_draw_task={is_draw_task}")
 
         if is_draw_task:
             try:
