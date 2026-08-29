@@ -6,13 +6,19 @@ plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 def draw_signal(text: str):
+    # 增加空值防护，text为None/空字符串直接返回默认波形
+    if text is None:
+        text = ""
+    text = text.lower()
+    
     fs = 1000
     t_total = 1
     t = np.linspace(0, t_total, int(fs * t_total), endpoint=False)
     f0 = 10
     signal = np.sin(2 * np.pi * f0 * t)
 
-    if "20hz" in text.lower():
+    # 下面原来的if判断就不要再写 .lower() 了！上面已经统一转小写
+    if "20hz" in text:
         f0 = 20
         signal = np.sin(2 * np.pi * f0 * t)
     elif "方波" in text:
@@ -23,6 +29,8 @@ def draw_signal(text: str):
         signal[:50] = 1
     elif "叠加" in text:
         signal = np.sin(2 * np.pi * 10 * t) + np.sin(2 * np.pi * 30 * t)
+        
+    # 剩下FFT、绘图、return fig全部保留不变
 
     N = len(signal)
     fft_vals = np.fft.fft(signal)
